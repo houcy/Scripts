@@ -71,4 +71,4 @@ t = threading.Thread(target = engine)
 t.start()
 while True:
   logfile = open("wifiprobe.txt","a")
-  sniff(prn=getresp, count=1))
+  sniff(prn=getresp, count=1)
